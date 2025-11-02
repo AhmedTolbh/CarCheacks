@@ -169,7 +169,7 @@ def create_dashboard():
     if auto_refresh:
         refresh_interval = st.sidebar.slider(
             "Refresh interval (seconds)",
-            min_value=1,
+            min_value=3,  # Minimum 3 seconds to prevent excessive refreshing
             max_value=30,
             value=5,
             step=1
@@ -360,6 +360,8 @@ def create_dashboard():
         )
     
     # Auto-refresh logic
+    # Note: st.rerun() is the recommended Streamlit pattern for auto-refresh
+    # The sleep ensures we don't hammer the system with constant updates
     if auto_refresh:
         time.sleep(refresh_interval)
         st.rerun()

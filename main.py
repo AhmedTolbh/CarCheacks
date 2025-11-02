@@ -33,8 +33,16 @@ class VisionOCRAgent:
         print("Initializing Vision & OCR Agent...")
         # Initialize EasyOCR reader for English
         # Using GPU if available, otherwise CPU
-        self.reader = easyocr.Reader(['en'], gpu=True if cv2.cuda.getCudaEnabledDeviceCount() > 0 else False)
-        print("Vision & OCR Agent ready!")
+        gpu_available = False
+        try:
+            # Check if CUDA is available
+            gpu_available = cv2.cuda.getCudaEnabledDeviceCount() > 0
+        except:
+            # OpenCV may not be compiled with CUDA support
+            gpu_available = False
+        
+        self.reader = easyocr.Reader(['en'], gpu=gpu_available)
+        print(f"Vision & OCR Agent ready! (GPU: {gpu_available})")
     
     def preprocess_frame(self, frame):
         """
@@ -112,12 +120,13 @@ class VisionOCRAgent:
         
         return None
     
-    def clean_plate_text(self, text):
+    def clean_plate_text(self, text, apply_corrections=True):
         """
         Clean and format OCR-extracted text.
         
         Args:
             text: Raw OCR text
+            apply_corrections: Apply common OCR corrections (O→0, I→1, S→5)
             
         Returns:
             Cleaned and formatted plate number
@@ -134,8 +143,11 @@ class VisionOCRAgent:
         # Remove non-alphanumeric characters
         text = re.sub(r'[^A-Z0-9]', '', text)
         
-        # Common OCR corrections
-        text = text.replace("O", "0").replace("I", "1").replace("S", "5")
+        # Common OCR corrections (optional - can cause false positives)
+        # Note: These corrections assume license plates use digits, not letters
+        # Disable if your plates contain O, I, or S as letters
+        if apply_corrections:
+            text = text.replace("O", "0").replace("I", "1").replace("S", "5")
         
         return text
     
