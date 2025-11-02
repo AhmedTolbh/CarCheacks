@@ -45,7 +45,16 @@ sample_frames/
 
 # YOLO models
 *.pt
+!models/README.md
 runs/
 
 # EasyOCR models
 .EasyOCR/
+
+# External dependencies
+sort/
+
+# Output files
+test.csv
+test_interpolated.csv
+out.mp4
