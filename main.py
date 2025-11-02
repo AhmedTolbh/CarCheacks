@@ -153,8 +153,14 @@ class VisionOCRAgent:
         """
         Detect license plate region using YOLOv8 model.
         
-        NOTE: This method uses a general YOLOv8 model. For production use,
-        replace with a license plate-specific model for better accuracy.
+        NOTE: The default yolov8n.pt is a general COCO object detection model 
+        that detects 80 object classes (person, car, truck, etc.). For optimal 
+        license plate detection, replace with a license plate-specific model.
+        
+        This method currently selects the highest confidence detection regardless
+        of class, which may not always be a license plate. For production use:
+        1. Use a license plate-specific YOLOv8 model, OR
+        2. Filter detections by class (e.g., only select 'car' class objects)
         
         Args:
             frame: Input BGR frame
@@ -176,6 +182,10 @@ class VisionOCRAgent:
             boxes = result.boxes
             
             if boxes and len(boxes) > 0:
+                # NOTE: Using general model, so we select highest confidence detection
+                # For license plate-specific model, you can filter by class here
+                # Example: boxes = [b for b in boxes if b.cls == LICENSE_PLATE_CLASS_ID]
+                
                 # Sort boxes by confidence and get the highest confidence detection
                 confidences = boxes.conf.cpu().numpy()
                 best_idx = confidences.argmax()
@@ -189,10 +199,11 @@ class VisionOCRAgent:
                 x1, y1 = max(0, x1), max(0, y1)
                 x2, y2 = min(w, x2), min(h, y2)
                 
-                # Extract plate region
-                plate_region = frame[y1:y2, x1:x2]
+                # Extract plate region (make a copy to avoid modifying original)
+                plate_region = frame[y1:y2, x1:x2].copy()
                 
-                # Draw rectangle on frame for visualization (on a copy to preserve original)
+                # Draw rectangle on frame for visualization
+                # Note: This modifies the input frame for display purposes
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 
                 return plate_region
