@@ -19,9 +19,6 @@ import time
 import cv2
 import tempfile
 import numpy as np
-from pathlib import Path
-import threading
-import queue
 
 # Import agents from main.py
 import sys
@@ -309,58 +306,63 @@ def main():
             
             if uploaded_file is not None:
                 # Save uploaded file temporarily
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
-                    tmp_file.write(uploaded_file.read())
-                    video_path = tmp_file.name
-                
-                st.success(f"✅ Video uploaded: {uploaded_file.name}")
-                
-                # Show video info
-                cap = cv2.VideoCapture(video_path)
-                fps = int(cap.get(cv2.CAP_PROP_FPS))
-                frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-                duration = frame_count / fps if fps > 0 else 0
-                cap.release()
-                
-                st.info(f"📹 Video Info: {frame_count} frames, {fps} FPS, ~{duration:.1f} seconds")
-                
-                # Process button
-                if st.button("🚀 Start Processing", type="primary"):
-                    st.markdown("---")
-                    st.subheader("Processing Video...")
+                video_path = None
+                try:
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as tmp_file:
+                        tmp_file.write(uploaded_file.read())
+                        video_path = tmp_file.name
                     
-                    # Initialize agents
-                    with st.spinner("Initializing AI agents..."):
-                        if VisionOCRAgent and AccessControlAgent:
-                            vision_agent = VisionOCRAgent(use_yolo=False)  # Use edge detection for demo
-                            access_agent = AccessControlAgent()
-                            st.success("✅ Agents initialized successfully!")
-                        else:
-                            st.error("Error: Could not initialize agents")
-                            st.stop()
+                    st.success(f"✅ Video uploaded: {uploaded_file.name}")
                     
-                    # Create placeholders for dynamic updates
-                    progress_placeholder = st.empty()
-                    frame_placeholder = st.empty()
-                    log_placeholder = st.empty()
+                    # Show video info
+                    cap = cv2.VideoCapture(video_path)
+                    fps = int(cap.get(cv2.CAP_PROP_FPS))
+                    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+                    duration = frame_count / fps if fps > 0 else 0
+                    cap.release()
                     
-                    # Process video
-                    try:
-                        process_video_file(
-                            video_path, 
-                            vision_agent, 
-                            access_agent,
-                            progress_placeholder,
-                            frame_placeholder,
-                            log_placeholder,
-                            dashboard
-                        )
-                    except Exception as e:
-                        st.error(f"Error processing video: {e}")
-                    finally:
-                        # Cleanup temp file
-                        if os.path.exists(video_path):
+                    st.info(f"📹 Video Info: {frame_count} frames, {fps} FPS, ~{duration:.1f} seconds")
+                    
+                    # Process button
+                    if st.button("🚀 Start Processing", type="primary"):
+                        st.markdown("---")
+                        st.subheader("Processing Video...")
+                        
+                        # Initialize agents
+                        with st.spinner("Initializing AI agents..."):
+                            if VisionOCRAgent and AccessControlAgent:
+                                vision_agent = VisionOCRAgent(use_yolo=False)  # Use edge detection for demo
+                                access_agent = AccessControlAgent()
+                                st.success("✅ Agents initialized successfully!")
+                            else:
+                                st.error("Error: Could not initialize agents")
+                                st.stop()
+                        
+                        # Create placeholders for dynamic updates
+                        progress_placeholder = st.empty()
+                        frame_placeholder = st.empty()
+                        log_placeholder = st.empty()
+                        
+                        # Process video
+                        try:
+                            process_video_file(
+                                video_path, 
+                                vision_agent, 
+                                access_agent,
+                                progress_placeholder,
+                                frame_placeholder,
+                                log_placeholder,
+                                dashboard
+                            )
+                        except Exception as e:
+                            st.error(f"Error processing video: {e}")
+                finally:
+                    # Cleanup temp file
+                    if video_path and os.path.exists(video_path):
+                        try:
                             os.remove(video_path)
+                        except Exception:
+                            pass  # Ignore errors during cleanup
         
         with col2:
             st.subheader("Agent Activity Log")
