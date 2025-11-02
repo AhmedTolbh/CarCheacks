@@ -80,13 +80,16 @@ The system requires two terminal windows to run both the main application and th
 python main.py
 ```
 
-When prompted:
-- Choose option **1** for webcam
-- Choose option **2** for video file (then enter the file path)
+When prompted, choose your video source:
+- Choose option **1** for live stream from security camera (IP camera/RTSP)
+  - Enter RTSP URL (e.g., `rtsp://username:password@192.168.1.100:554/stream`)
+  - Or enter IP camera HTTP stream (e.g., `http://192.168.1.100:8080/video`)
+- Choose option **2** for video file upload (then enter the file path)
+- Choose option **3** for webcam
 
 The application will:
-- Capture video frames
-- Detect and read license plates
+- Capture video frames from your chosen source
+- Detect and read license plates using YOLOv8 (if available) or edge detection
 - Make access control decisions
 - Log all attempts to `access_log.csv`
 
@@ -166,9 +169,15 @@ In the dashboard sidebar:
 ### Agent 1: Vision & OCR Agent
 
 1. **Frame Preprocessing**: Converts frames to grayscale and applies bilateral filtering
-2. **Plate Detection**: Uses Canny edge detection and contour analysis to find rectangular regions
+2. **Plate Detection**: 
+   - **Primary Method**: Uses YOLOv8 pre-trained models for accurate license plate detection on car dashboards
+   - **Fallback Method**: Uses Canny edge detection and contour analysis if YOLOv8 is unavailable
 3. **OCR Extraction**: Uses EasyOCR to read text from detected plate regions
 4. **Text Cleaning**: Removes spaces, corrects common OCR errors (O→0, I→1, S→5)
+5. **Video Source Support**: 
+   - IP cameras and RTSP streams (security cameras)
+   - Video file upload
+   - Local webcam
 
 ### Agent 2: Access Control Agent
 
@@ -187,16 +196,23 @@ In the dashboard sidebar:
 
 ## 🛠️ Troubleshooting
 
+### IP Camera / RTSP Stream Issues
+- Verify the stream URL is correct and accessible
+- Check network connectivity to the camera
+- Ensure username/password are correct if required
+- Some cameras require specific URL formats (check camera documentation)
+
 ### Camera not detected
 - Try different camera indices: `cv2.VideoCapture(1)` or `cv2.VideoCapture(2)`
 - Check camera permissions
 - Ensure camera is not in use by another application
 
 ### Low OCR accuracy
+- YOLOv8 model provides better plate detection than edge detection
 - Improve lighting conditions
-- Use higher resolution camera
+- Use higher resolution camera or video stream
 - Adjust preprocessing parameters
-- Consider using a pre-trained YOLOv8 license plate model
+- Use a specialized license plate detection model (replace `yolov8n.pt` with a license plate specific model)
 
 ### Dashboard not updating
 - Ensure `access_log.csv` is being created by main.py
@@ -207,10 +223,28 @@ In the dashboard sidebar:
 - Install CUDA toolkit and PyTorch with CUDA support
 - Verify GPU availability: `python -c "import torch; print(torch.cuda.is_available())"`
 
+### YOLOv8 Model Download
+- On first run, YOLOv8 will automatically download the model (may take a few minutes)
+- Ensure you have internet connection for initial setup
+- Models are cached locally after first download
+
 ## 📊 Sample Output
 
 ### Console Output (main.py)
 ```
+Initializing Vision & OCR Agent...
+Loading YOLOv8 license plate detection model...
+YOLOv8 model loaded successfully!
+Vision & OCR Agent ready! (GPU: True, YOLOv8: True)
+
+Select video source:
+1. Live stream from security camera (IP camera/RTSP)
+2. Upload/Load video file
+3. Webcam
+Enter choice (1, 2, or 3): 1
+
+Stream URL: rtsp://192.168.1.100:554/stream
+
 🚗 License Plate Detected: ABC123
 ==================================================
 ✓ GATE OPENING...
@@ -236,11 +270,13 @@ Decision: DENY
 - Whitelist file should have restricted permissions
 - Consider encrypting stored data for production use
 - Implement proper authentication for dashboard access
+- Secure RTSP/IP camera streams with strong passwords
+- Use VPN or secure network for remote camera access
 
 ## 🚧 Future Enhancements
 
-- Integration with YOLOv8 for improved plate detection
-- Multi-camera support
+- Fine-tune YOLOv8 on custom license plate dataset
+- Multi-camera support with camera management interface
 - Email/SMS notifications for denied access
 - Advanced analytics (peak hours, suspicious patterns)
 - Integration with physical gate controllers
@@ -261,4 +297,4 @@ For questions or support, please open an issue on GitHub.
 
 ---
 
-**Note**: This system uses basic edge detection for plate detection. For production use, integrate a specialized license plate detection model (e.g., YOLOv8 trained on license plate datasets) for significantly improved accuracy.
+**Note**: This system now uses YOLOv8 for improved license plate detection. The model will be automatically downloaded on first run. For even better accuracy, you can replace the default `yolov8n.pt` model with a specialized license plate detection model trained on car dashboard and vehicle datasets. A fallback to basic edge detection is available if YOLOv8 is unavailable.
