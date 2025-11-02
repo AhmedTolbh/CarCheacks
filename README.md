@@ -10,6 +10,24 @@ This system uses three specialized AI agents working together to provide intelli
 2. **Agent 2: Access Control Agent** - Makes authorization decisions and logs all access attempts
 3. **Agent 3: Data Analytics Agent** - Provides real-time analytics and visualizations through a dashboard
 
+## 🌟 New Features (Hackathon Demo Ready!)
+
+### Enhanced Dashboard with Video Upload
+- **📹 Direct Video Upload**: Upload videos through web interface for instant analysis
+- **🔄 Workflow Visualization**: See how agents communicate in real-time (swarm intelligence)
+- **📊 Integrated Analytics**: All features in one unified dashboard
+- **🎬 Live Processing Display**: Watch frame-by-frame analysis with detected plates
+- **📝 Agent Activity Logs**: Real-time view of multi-agent communication
+
+**Perfect for Hackathon Demonstrations!** Upload a video and see all three agents working together instantly.
+
+Quick start:
+```bash
+streamlit run dashboard_enhanced.py
+```
+
+See [ENHANCED_DASHBOARD_GUIDE.md](ENHANCED_DASHBOARD_GUIDE.md) for complete instructions.
+
 ## 🏗️ System Architecture
 
 ```
@@ -72,7 +90,24 @@ This system uses three specialized AI agents working together to provide intelli
 
 ## 🎮 Usage
 
-The system requires two terminal windows to run both the main application and the dashboard.
+### 🌟 NEW: Enhanced Dashboard (Recommended for Demos)
+
+For the best experience, especially for Hackathon demonstrations, use the **enhanced dashboard** with integrated video upload and workflow visualization:
+
+```bash
+streamlit run dashboard_enhanced.py
+```
+
+Open your browser to `http://localhost:8501` and you'll have access to:
+- **📹 Video Upload Tab**: Upload videos directly and see real-time processing
+- **📊 Analytics Tab**: View all statistics and insights
+- **🔄 Workflow Tab**: Visualize how agents communicate (swarm intelligence)
+
+See [ENHANCED_DASHBOARD_GUIDE.md](ENHANCED_DASHBOARD_GUIDE.md) for detailed instructions.
+
+### Traditional Two-Terminal Setup
+
+Alternatively, the system can run with two terminal windows for the main application and dashboard separately.
 
 ### Terminal 1: Start the Main Application (Agents 1 & 2)
 
@@ -113,26 +148,37 @@ The dashboard displays:
 
 ### Testing Without a Camera
 
-To test the dashboard without running the camera system, generate demo data:
+For testing the enhanced dashboard, create a demo video:
+
+```bash
+python create_demo_video.py 10
+```
+
+This creates a 10-second demo video with simulated license plates. Upload it through the enhanced dashboard for testing.
+
+To test analytics without video processing, generate demo log data:
 
 ```bash
 python generate_demo_data.py 50
 ```
 
-This creates `access_log.csv` with 50 sample entries. You can then run the dashboard to see the analytics.
+This creates `access_log.csv` with 50 sample entries.
 
 ## 📁 Project Structure
 
 ```
 CarCheacks/
-├── main.py                    # Main application (Agents 1 & 2)
-├── dashboard.py               # Streamlit dashboard (Agent 3)
-├── authorized_plates.csv      # Whitelist of authorized plates
-├── requirements.txt           # Python dependencies
-├── generate_demo_data.py      # Demo data generator for testing
-├── validate_system.py         # System validation script
-├── access_log.csv            # Access log (generated at runtime)
-├── .gitignore                # Git ignore rules
+├── main.py                      # Main application (Agents 1 & 2)
+├── dashboard.py                 # Original analytics dashboard (Agent 3)
+├── dashboard_enhanced.py        # 🌟 NEW: Enhanced dashboard with video upload
+├── create_demo_video.py         # 🌟 NEW: Demo video generator
+├── authorized_plates.csv        # Whitelist of authorized plates
+├── requirements.txt             # Python dependencies
+├── generate_demo_data.py        # Demo data generator for testing
+├── validate_system.py           # System validation script
+├── access_log.csv              # Access log (generated at runtime)
+├── .gitignore                  # Git ignore rules
+├── ENHANCED_DASHBOARD_GUIDE.md # 🌟 NEW: Enhanced dashboard documentation
 └── README.md                 # This file
 ```
 
