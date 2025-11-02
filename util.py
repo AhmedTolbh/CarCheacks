@@ -55,7 +55,7 @@ def write_csv(results, output_path):
                                                             results[frame_nmr][car_id]['license_plate']['text'],
                                                             results[frame_nmr][car_id]['license_plate']['text_score'])
                             )
-        f.close()
+
 
 
 def license_complies_format(text):

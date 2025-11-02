@@ -102,7 +102,8 @@ while ret:
                             (0, 0, 0),
                             17)
 
-            except:
+            except Exception:
+                # Skip if license plate overlay fails (e.g., bounding box out of frame)
                 pass
 
         out.write(frame)
