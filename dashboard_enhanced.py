@@ -20,7 +20,7 @@ import cv2
 import tempfile
 import numpy as np
 
-# Import agents from main.py
+# Import agents from main_old.py
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
