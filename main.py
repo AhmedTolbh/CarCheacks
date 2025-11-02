@@ -4,7 +4,7 @@ import numpy as np
 
 import util
 from sort.sort import Sort
-from util import get_car, read_license_plate, write_csv
+from util import get_car, read_license_plate, write_csv, write_license_plates_to_excel
 
 
 results = {}
@@ -68,3 +68,6 @@ while ret:
 
 # write results
 write_csv(results, './test.csv')
+
+# Agent 2: Write license plates to Excel file
+write_license_plates_to_excel(results, './license_plates.xlsx')
