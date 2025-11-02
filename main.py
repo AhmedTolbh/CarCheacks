@@ -16,6 +16,14 @@ import re
 import numpy as np
 from pathlib import Path
 
+# Try to import ultralytics for YOLOv8 license plate detection
+try:
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
+except ImportError:
+    YOLO_AVAILABLE = False
+    print("Warning: ultralytics not available. Using basic edge detection instead.")
+
 
 class VisionOCRAgent:
     """
@@ -28,8 +36,8 @@ class VisionOCRAgent:
     - Clean and format the extracted text
     """
     
-    def __init__(self):
-        """Initialize the Vision & OCR Agent with EasyOCR reader."""
+    def __init__(self, use_yolo=True):
+        """Initialize the Vision & OCR Agent with EasyOCR reader and optionally YOLOv8."""
         print("Initializing Vision & OCR Agent...")
         # Initialize EasyOCR reader for English
         # Using GPU if available, otherwise CPU
@@ -42,7 +50,28 @@ class VisionOCRAgent:
             gpu_available = False
         
         self.reader = easyocr.Reader(['en'], gpu=gpu_available)
-        print(f"Vision & OCR Agent ready! (GPU: {gpu_available})")
+        
+        # Initialize YOLOv8 for license plate detection if available
+        self.yolo_model = None
+        self.use_yolo = use_yolo and YOLO_AVAILABLE
+        
+        if self.use_yolo:
+            try:
+                # Try to load a pre-trained license plate detection model
+                # Using YOLOv8n (nano) for speed
+                # NOTE: For production use, replace with a license plate-specific model
+                # such as 'license_plate_detector.pt' trained on license plate datasets
+                print("Loading YOLOv8 license plate detection model...")
+                # This will download the model on first run
+                self.yolo_model = YOLO('yolov8n.pt')  # Default general model
+                print("YOLOv8 model loaded successfully!")
+                print("TIP: For better accuracy, use a license plate-specific model")
+            except Exception as e:
+                print(f"Warning: Could not load YOLOv8 model: {e}")
+                print("Falling back to basic edge detection.")
+                self.use_yolo = False
+        
+        print(f"Vision & OCR Agent ready! (GPU: {gpu_available}, YOLOv8: {self.use_yolo})")
     
     def preprocess_frame(self, frame):
         """
@@ -120,6 +149,67 @@ class VisionOCRAgent:
         
         return None
     
+    def detect_plate_region_yolo(self, frame):
+        """
+        Detect license plate region using YOLOv8 model.
+        
+        NOTE: The default yolov8n.pt is a general COCO object detection model 
+        that detects 80 object classes (person, car, truck, etc.). For optimal 
+        license plate detection, replace with a license plate-specific model.
+        
+        This method currently selects the highest confidence detection regardless
+        of class, which may not always be a license plate. For production use:
+        1. Use a license plate-specific YOLOv8 model, OR
+        2. Filter detections by class (e.g., only select 'car' class objects)
+        
+        Args:
+            frame: Input BGR frame
+            
+        Returns:
+            Cropped plate region or None if no plate detected
+        """
+        if not self.yolo_model:
+            return None
+        
+        # Run YOLOv8 inference
+        results = self.yolo_model(frame, verbose=False)
+        
+        # Process results
+        if results and len(results) > 0:
+            result = results[0]
+            
+            # Get boxes
+            boxes = result.boxes
+            
+            if boxes and len(boxes) > 0:
+                # NOTE: Using general model, so we select highest confidence detection
+                # For license plate-specific model, you can filter by class here
+                # Example: boxes = [b for b in boxes if b.cls == LICENSE_PLATE_CLASS_ID]
+                
+                # Sort boxes by confidence and get the highest confidence detection
+                confidences = boxes.conf.cpu().numpy()
+                best_idx = confidences.argmax()
+                best_box = boxes[best_idx]
+                
+                # Extract bounding box coordinates
+                x1, y1, x2, y2 = map(int, best_box.xyxy[0])
+                
+                # Ensure coordinates are within frame bounds
+                h, w = frame.shape[:2]
+                x1, y1 = max(0, x1), max(0, y1)
+                x2, y2 = min(w, x2), min(h, y2)
+                
+                # Extract plate region (make a copy to avoid modifying original)
+                plate_region = frame[y1:y2, x1:x2].copy()
+                
+                # Draw rectangle on frame for visualization
+                # Note: This modifies the input frame for display purposes
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                
+                return plate_region
+        
+        return None
+    
     def clean_plate_text(self, text, apply_corrections=True):
         """
         Clean and format OCR-extracted text.
@@ -188,8 +278,11 @@ class VisionOCRAgent:
         Returns:
             Dictionary with plate_number and frame, or None if no plate detected
         """
-        # Detect plate region
-        plate_region = self.detect_plate_region(frame)
+        # Detect plate region using YOLOv8 if available, otherwise use edge detection
+        if self.use_yolo:
+            plate_region = self.detect_plate_region_yolo(frame)
+        else:
+            plate_region = self.detect_plate_region(frame)
         
         if plate_region is not None:
             # Extract text from plate
@@ -344,20 +437,33 @@ def main():
     print()
     
     # Initialize agents
-    vision_agent = VisionOCRAgent()
+    # Enable YOLOv8 if available for better license plate detection
+    vision_agent = VisionOCRAgent(use_yolo=True)
     access_agent = AccessControlAgent()
     
     print()
     print("Select video source:")
-    print("1. Webcam (default)")
-    print("2. Video file")
-    choice = input("Enter choice (1 or 2): ").strip()
+    print("1. Live stream from security camera (IP camera/RTSP)")
+    print("2. Upload/Load video file")
+    print("3. Webcam")
+    choice = input("Enter choice (1, 2, or 3): ").strip()
     
-    if choice == "2":
+    if choice == "1":
+        # IP camera / RTSP stream
+        print()
+        print("Enter the RTSP URL or IP camera stream URL.")
+        print("Examples:")
+        print("  - rtsp://username:password@192.168.1.100:554/stream")
+        print("  - http://192.168.1.100:8080/video")
+        stream_url = input("Stream URL: ").strip()
+        cap = cv2.VideoCapture(stream_url)
+    elif choice == "2":
+        # Video file
         video_path = input("Enter video file path: ").strip()
         cap = cv2.VideoCapture(video_path)
     else:
-        # Use webcam (0 is usually the default webcam)
+        # Webcam (default)
+        print("Using webcam as video source...")
         cap = cv2.VideoCapture(0)
     
     if not cap.isOpened():

@@ -30,7 +30,13 @@ Open your browser to `http://localhost:8501` to see the analytics!
 python main.py
 ```
 
-Choose option 1 for webcam or option 2 for a video file.
+Choose your video source:
+- **Option 1**: Live stream from security camera (IP/RTSP)
+  - Enter your camera's stream URL
+  - Example: `rtsp://admin:password@192.168.1.100:554/stream`
+- **Option 2**: Upload/load a video file
+  - Enter the path to your video file
+- **Option 3**: Use your webcam
 
 **Terminal 2** - Start the dashboard:
 ```bash
