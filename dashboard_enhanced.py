@@ -25,9 +25,9 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from main import VisionOCRAgent, AccessControlAgent
+    from main_old import VisionOCRAgent, AccessControlAgent
 except ImportError:
-    st.error("Error: Could not import agents from main.py")
+    st.error("Error: Could not import agents from main_old.py")
     VisionOCRAgent = None
     AccessControlAgent = None
 
