@@ -4,11 +4,16 @@
 
 ### 1. Agent 1: Vision & OCR Agent ✅
 - [x] Real-time video frame capture (OpenCV)
-- [x] License plate detection (Edge detection + Contours)
+- [x] **NEW: YOLOv8 pre-trained model integration for license plate detection**
+- [x] License plate detection (YOLOv8 primary, Edge detection fallback)
 - [x] OCR text extraction (EasyOCR)
 - [x] Text cleaning and formatting
 - [x] GPU acceleration with CPU fallback
 - [x] Configurable OCR corrections
+- [x] **NEW: Multi-source video input support**
+  - [x] IP cameras and RTSP streams
+  - [x] Video file upload
+  - [x] Webcam
 
 ### 2. Agent 2: Access Control (Gatekeeper) Agent ✅
 - [x] Whitelist management (CSV-based)
