@@ -108,6 +108,16 @@ The dashboard displays:
 - **Hourly Chart**: Traffic distribution by hour
 - **Live Log**: Searchable and filterable access log table
 
+### Testing Without a Camera
+
+To test the dashboard without running the camera system, generate demo data:
+
+```bash
+python generate_demo_data.py 50
+```
+
+This creates `access_log.csv` with 50 sample entries. You can then run the dashboard to see the analytics.
+
 ## 📁 Project Structure
 
 ```
@@ -116,6 +126,8 @@ CarCheacks/
 ├── dashboard.py               # Streamlit dashboard (Agent 3)
 ├── authorized_plates.csv      # Whitelist of authorized plates
 ├── requirements.txt           # Python dependencies
+├── generate_demo_data.py      # Demo data generator for testing
+├── validate_system.py         # System validation script
 ├── access_log.csv            # Access log (generated at runtime)
 ├── .gitignore                # Git ignore rules
 └── README.md                 # This file
