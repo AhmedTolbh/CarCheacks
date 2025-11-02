@@ -1,0 +1,22 @@
+# Core Computer Vision and OCR
+opencv-python==4.8.1.78
+easyocr==1.7.0
+torch>=2.0.0
+torchvision>=0.15.0
+
+# YOLOv8 for license plate detection
+ultralytics==8.0.196
+
+# Data Processing
+pandas==2.1.1
+numpy==1.24.3
+
+# Dashboard and Visualization
+streamlit==1.27.2
+plotly==5.17.0
+
+# Image Processing
+Pillow==10.0.1
+
+# Utilities
+python-dateutil==2.8.2
