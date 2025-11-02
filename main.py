@@ -58,11 +58,14 @@ class VisionOCRAgent:
         if self.use_yolo:
             try:
                 # Try to load a pre-trained license plate detection model
-                # Using YOLOv8n (nano) for speed, trained on license plates
+                # Using YOLOv8n (nano) for speed
+                # NOTE: For production use, replace with a license plate-specific model
+                # such as 'license_plate_detector.pt' trained on license plate datasets
                 print("Loading YOLOv8 license plate detection model...")
                 # This will download the model on first run
-                self.yolo_model = YOLO('yolov8n.pt')  # Can be replaced with a license plate specific model
+                self.yolo_model = YOLO('yolov8n.pt')  # Default general model
                 print("YOLOv8 model loaded successfully!")
+                print("TIP: For better accuracy, use a license plate-specific model")
             except Exception as e:
                 print(f"Warning: Could not load YOLOv8 model: {e}")
                 print("Falling back to basic edge detection.")
@@ -150,6 +153,9 @@ class VisionOCRAgent:
         """
         Detect license plate region using YOLOv8 model.
         
+        NOTE: This method uses a general YOLOv8 model. For production use,
+        replace with a license plate-specific model for better accuracy.
+        
         Args:
             frame: Input BGR frame
             
@@ -166,13 +172,14 @@ class VisionOCRAgent:
         if results and len(results) > 0:
             result = results[0]
             
-            # Get boxes with class filtering (if using a license plate specific model)
-            # For general object detection, we'll look for the highest confidence detection
+            # Get boxes
             boxes = result.boxes
             
             if boxes and len(boxes) > 0:
-                # Get the detection with highest confidence
-                best_box = boxes[0]
+                # Sort boxes by confidence and get the highest confidence detection
+                confidences = boxes.conf.cpu().numpy()
+                best_idx = confidences.argmax()
+                best_box = boxes[best_idx]
                 
                 # Extract bounding box coordinates
                 x1, y1, x2, y2 = map(int, best_box.xyxy[0])
@@ -185,7 +192,7 @@ class VisionOCRAgent:
                 # Extract plate region
                 plate_region = frame[y1:y2, x1:x2]
                 
-                # Draw rectangle on original frame for visualization
+                # Draw rectangle on frame for visualization (on a copy to preserve original)
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 
                 return plate_region

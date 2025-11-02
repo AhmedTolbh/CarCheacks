@@ -170,7 +170,7 @@ In the dashboard sidebar:
 
 1. **Frame Preprocessing**: Converts frames to grayscale and applies bilateral filtering
 2. **Plate Detection**: 
-   - **Primary Method**: Uses YOLOv8 pre-trained models for accurate license plate detection on car dashboards
+   - **Primary Method**: Uses YOLOv8 object detection (default: general YOLOv8n model; can be replaced with license plate-specific models)
    - **Fallback Method**: Uses Canny edge detection and contour analysis if YOLOv8 is unavailable
 3. **OCR Extraction**: Uses EasyOCR to read text from detected plate regions
 4. **Text Cleaning**: Removes spaces, corrects common OCR errors (O→0, I→1, S→5)
@@ -208,11 +208,11 @@ In the dashboard sidebar:
 - Ensure camera is not in use by another application
 
 ### Low OCR accuracy
-- YOLOv8 model provides better plate detection than edge detection
+- Use YOLOv8 with a specialized license plate detection model for better accuracy
+- Replace the default `yolov8n.pt` with a model trained on license plate datasets
 - Improve lighting conditions
 - Use higher resolution camera or video stream
 - Adjust preprocessing parameters
-- Use a specialized license plate detection model (replace `yolov8n.pt` with a license plate specific model)
 
 ### Dashboard not updating
 - Ensure `access_log.csv` is being created by main.py
@@ -297,4 +297,4 @@ For questions or support, please open an issue on GitHub.
 
 ---
 
-**Note**: This system now uses YOLOv8 for improved license plate detection. The model will be automatically downloaded on first run. For even better accuracy, you can replace the default `yolov8n.pt` model with a specialized license plate detection model trained on car dashboard and vehicle datasets. A fallback to basic edge detection is available if YOLOv8 is unavailable.
+**Note**: This system now integrates YOLOv8 for object detection. The default `yolov8n.pt` general object detection model will be automatically downloaded on first run. For production use with optimal accuracy, replace it with a specialized license plate detection model trained on license plate datasets. A fallback to basic edge detection is available if YOLOv8 is unavailable.
