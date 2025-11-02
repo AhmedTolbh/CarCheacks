@@ -1,346 +1,262 @@
-# Vehicle Access Control System - Multi-Agent AI
+# automatic-number-plate-recognition-python-yolov8
 
-A real-time, multi-agent AI system for smart vehicle access control using computer vision, OCR, and data analytics.
+Automatic Number Plate Recognition (ANPR) system using Python, YOLOv8, and EasyOCR.
 
-## 🎯 Overview
+This implementation is based on the [automatic-number-plate-recognition-python-yolov8](https://github.com/computervisioneng/automatic-number-plate-recognition-python-yolov8) project.
 
-This system uses three specialized AI agents working together to provide intelligent vehicle access control:
+## Overview
 
-1. **Agent 1: Vision & OCR Agent** - Detects vehicles and reads license plates using computer vision and OCR
-2. **Agent 2: Access Control Agent** - Makes authorization decisions and logs all access attempts
-3. **Agent 3: Data Analytics Agent** - Provides real-time analytics and visualizations through a dashboard
+This system detects and recognizes license plates from video files using:
+- **YOLOv8** for vehicle detection
+- **SORT** tracker for multi-object tracking
+- **YOLOv8** (custom trained) for license plate detection
+- **EasyOCR** for text recognition
 
-## 🌟 New Features (Hackathon Demo Ready!)
+## Data
 
-### Enhanced Dashboard with Video Upload
-- **📹 Direct Video Upload**: Upload videos through web interface for instant analysis
-- **🔄 Workflow Visualization**: See how agents communicate in real-time (swarm intelligence)
-- **📊 Integrated Analytics**: All features in one unified dashboard
-- **🎬 Live Processing Display**: Watch frame-by-frame analysis with detected plates
-- **📝 Agent Activity Logs**: Real-time view of multi-agent communication
+Sample videos for testing can be downloaded from:
+- [Traffic flow in the highway](https://www.pexels.com/video/traffic-flow-in-the-highway-2103099/)
 
-**Perfect for Hackathon Demonstrations!** Upload a video and see all three agents working together instantly.
+## Models
 
-Quick start:
+### Vehicle Detection
+Uses a YOLOv8 pretrained model (`yolov8n.pt`) to detect vehicles in the COCO dataset classes:
+- Class 2: Car
+- Class 3: Motorcycle
+- Class 5: Bus
+- Class 7: Truck
+
+### License Plate Detection
+A custom YOLOv8 model trained on license plate data. The model should be placed in `./models/license_plate_detector.pt`.
+
+You can train your own model using [this license plate dataset](https://universe.roboflow.com/roboflow-universe-projects/license-plate-recognition-rxg4e/dataset/4) and following this [step-by-step YOLOv8 training guide](https://github.com/computervisioneng/train-yolov8-custom-dataset-step-by-step-guide).
+
+## Dependencies
+
+### SORT Tracker
+The SORT (Simple Online and Realtime Tracking) module needs to be downloaded from the [official repository](https://github.com/abewley/sort):
+
 ```bash
-streamlit run dashboard_enhanced.py
+git clone https://github.com/abewley/sort.git
 ```
 
-See [ENHANCED_DASHBOARD_GUIDE.md](ENHANCED_DASHBOARD_GUIDE.md) for complete instructions.
+### Python Packages
+Install required packages:
 
-## 🏗️ System Architecture
-
-```
-┌─────────────────────┐
-│   Video Source      │
-│ (Camera/Video File) │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────────────────────┐
-│  Agent 1: Vision & OCR Agent        │
-│  - Frame capture                    │
-│  - Plate detection (edge detection) │
-│  - OCR (EasyOCR)                    │
-│  - Text cleaning                    │
-└──────────┬──────────────────────────┘
-           │ plate_number
-           ▼
-┌─────────────────────────────────────┐
-│  Agent 2: Access Control Agent      │
-│  - Whitelist check                  │
-│  - Allow/Deny decision              │
-│  - Gate/alarm trigger               │
-│  - Access logging                   │
-└──────────┬──────────────────────────┘
-           │ access_log.csv
-           ▼
-┌─────────────────────────────────────┐
-│  Agent 3: Data Analytics Agent      │
-│  - Real-time data ingestion         │
-│  - KPI calculation                  │
-│  - Interactive dashboard            │
-│  - Visualizations                   │
-└─────────────────────────────────────┘
+```bash
+pip install -r requirements.txt
 ```
 
-## 📋 Prerequisites
+Required packages:
+- ultralytics==8.0.114
+- pandas==2.0.2
+- opencv-python==4.7.0.72
+- numpy==1.24.3
+- scipy==1.10.1
+- easyocr==1.7.0
+- filterpy==1.4.5
 
-- Python 3.8 or higher
-- Webcam or video file for testing
-- (Optional) CUDA-compatible GPU for faster OCR processing
+## Project Structure
 
-## 🚀 Installation
+```
+CarCheacks/
+├── main.py                     # Main detection and tracking script
+├── util.py                     # Utility functions (OCR, validation, CSV writing)
+├── visualize.py                # Visualization script (renders output video)
+├── add_missing_data.py         # Interpolation script for missing frames
+├── requirements.txt            # Python dependencies
+├── sort/                       # SORT tracker (cloned from GitHub)
+├── models/
+│   └── license_plate_detector.pt  # Custom trained license plate detector
+├── sample.mp4                  # Input video file
+├── test.csv                    # Detection results (generated)
+├── test_interpolated.csv       # Interpolated results (generated)
+└── out.mp4                     # Output annotated video (generated)
+```
 
-1. **Clone the repository**
+## Usage
+
+### 1. Prepare Your Setup
+
+1. Clone this repository
+2. Clone the SORT tracker:
    ```bash
-   git clone https://github.com/AhmedTolbh/CarCheacks.git
-   cd CarCheacks
+   git clone https://github.com/abewley/sort.git
    ```
-
-2. **Install dependencies**
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
+4. Place your trained license plate detector model at `./models/license_plate_detector.pt`
+5. Place your input video at `./sample.mp4`
 
-3. **Verify installation**
-   ```bash
-   python -c "import cv2, easyocr, streamlit, pandas; print('All dependencies installed successfully!')"
-   ```
-
-## 🎮 Usage
-
-### 🌟 NEW: Enhanced Dashboard (Recommended for Demos)
-
-For the best experience, especially for Hackathon demonstrations, use the **enhanced dashboard** with integrated video upload and workflow visualization:
-
-```bash
-streamlit run dashboard_enhanced.py
-```
-
-Open your browser to `http://localhost:8501` and you'll have access to:
-- **📹 Video Upload Tab**: Upload videos directly and see real-time processing
-- **📊 Analytics Tab**: View all statistics and insights
-- **🔄 Workflow Tab**: Visualize how agents communicate (swarm intelligence)
-
-See [ENHANCED_DASHBOARD_GUIDE.md](ENHANCED_DASHBOARD_GUIDE.md) for detailed instructions.
-
-### Traditional Two-Terminal Setup
-
-Alternatively, the system can run with two terminal windows for the main application and dashboard separately.
-
-### Terminal 1: Start the Main Application (Agents 1 & 2)
+### 2. Run Detection and Tracking
 
 ```bash
 python main.py
 ```
 
-When prompted, choose your video source:
-- Choose option **1** for live stream from security camera (IP camera/RTSP)
-  - Enter RTSP URL (e.g., `rtsp://username:password@192.168.1.100:554/stream`)
-  - Or enter IP camera HTTP stream (e.g., `http://192.168.1.100:8080/video`)
-- Choose option **2** for video file upload (then enter the file path)
-- Choose option **3** for webcam
+This will:
+- Process the video frame by frame
+- Detect vehicles using YOLOv8
+- Track vehicles using SORT
+- Detect license plates on tracked vehicles
+- Read license plate text using EasyOCR
+- Save results to `test.csv`
 
-The application will:
-- Capture video frames from your chosen source
-- Detect and read license plates using YOLOv8 (if available) or edge detection
-- Make access control decisions
-- Log all attempts to `access_log.csv`
-
-**Controls:**
-- Press `q` to quit the application
-
-### Terminal 2: Start the Analytics Dashboard (Agent 3)
+### 3. Interpolate Missing Data
 
 ```bash
-streamlit run dashboard.py
+python add_missing_data.py
 ```
 
-This will open a web browser with the analytics dashboard at `http://localhost:8501`
+This script fills in gaps in the tracking data by interpolating bounding boxes for frames where detection was missed. Output is saved to `test_interpolated.csv`.
 
-The dashboard displays:
-- **KPIs**: Total entries, allowed, denied, and allow rate
-- **Pie Chart**: ALLOW vs DENY distribution
-- **Bar Chart**: Top 10 vehicles by entry attempts
-- **Hourly Chart**: Traffic distribution by hour
-- **Live Log**: Searchable and filterable access log table
-
-### Testing Without a Camera
-
-For testing the enhanced dashboard, create a demo video:
+### 4. Generate Annotated Video
 
 ```bash
-python create_demo_video.py 10
+python visualize.py
 ```
 
-This creates a 10-second demo video with simulated license plates. Upload it through the enhanced dashboard for testing.
+This creates an output video (`out.mp4`) with:
+- Green bordered boxes around detected vehicles
+- Red boxes around license plates
+- License plate text displayed above each vehicle
 
-To test analytics without video processing, generate demo log data:
+## How It Works
 
+### main.py
+
+The main detection pipeline:
+
+1. **Load Models**
+   - YOLOv8n for vehicle detection
+   - Custom YOLOv8 model for license plate detection
+
+2. **Process Video**
+   - For each frame:
+     - Detect vehicles (cars, trucks, buses, motorcycles)
+     - Track vehicles using SORT
+     - Detect license plates on each vehicle
+     - Crop and preprocess license plate regions
+     - Apply OCR to extract text
+     - Validate and format license plate text
+     - Store results with frame number and vehicle ID
+
+3. **Save Results**
+   - Write detections to CSV with:
+     - Frame number
+     - Vehicle ID
+     - Vehicle bounding box
+     - License plate bounding box
+     - License plate text
+     - Confidence scores
+
+### util.py
+
+Utility functions:
+
+- **read_license_plate()**: Uses EasyOCR to extract text from license plate images
+- **license_complies_format()**: Validates license plate format (7 characters: 2 letters, 2 digits, 3 letters)
+- **format_license()**: Corrects common OCR errors (e.g., 'O' → '0', 'I' → '1')
+- **get_car()**: Associates detected license plates with tracked vehicles
+- **write_csv()**: Saves results to CSV format
+
+### add_missing_data.py
+
+Interpolation script:
+
+- Identifies gaps in vehicle tracking
+- Uses linear interpolation to estimate bounding boxes for missing frames
+- Ensures smooth tracking across the entire video
+- Preserves original detection data while filling gaps
+
+### visualize.py
+
+Visualization script:
+
+- Reads interpolated CSV data
+- Draws bounding boxes and annotations on video frames
+- Displays license plate text above each vehicle
+- Creates professional-looking output video
+
+## Output Files
+
+### test.csv
+Raw detection results with columns:
+- `frame_nmr`: Frame number
+- `car_id`: Unique vehicle tracking ID
+- `car_bbox`: Vehicle bounding box [x1, y1, x2, y2]
+- `license_plate_bbox`: License plate bounding box [x1, y1, x2, y2]
+- `license_plate_bbox_score`: Detection confidence
+- `license_number`: Detected text
+- `license_number_score`: OCR confidence
+
+### test_interpolated.csv
+Same format as test.csv but with interpolated data for missing frames (indicated by score values of '0').
+
+### out.mp4
+Annotated video showing:
+- Vehicle tracking with green corner markers
+- License plate detection with red boxes
+- License plate text overlaid above vehicles
+
+## License Plate Format
+
+This implementation expects license plates in the format:
+```
+AA00AAA
+```
+Where:
+- A = Letter (A-Z)
+- 0 = Digit (0-9)
+
+The format can be customized in `util.py` by modifying the `license_complies_format()` function.
+
+## Tips for Better Results
+
+1. **Video Quality**: Higher resolution videos produce better results
+2. **Lighting**: Good lighting conditions improve detection and OCR accuracy
+3. **Camera Angle**: Front-facing or rear-facing views work best
+4. **Model Training**: Train the license plate detector on your specific region's plate formats
+5. **OCR Tuning**: Adjust character mapping in `util.py` based on your plate format
+
+## Troubleshooting
+
+### Model Not Found Error
+Ensure the license plate detector model is at `./models/license_plate_detector.pt`
+
+### SORT Import Error
+Make sure the SORT repository is cloned in the project directory:
 ```bash
-python generate_demo_data.py 50
+git clone https://github.com/abewley/sort.git
 ```
 
-This creates `access_log.csv` with 50 sample entries.
+### Low Detection Accuracy
+- Check video quality
+- Verify model is trained on similar license plate formats
+- Adjust confidence thresholds in main.py
+- Improve lighting conditions in source video
 
-## 📁 Project Structure
+### Memory Issues
+For long videos, process in batches or reduce resolution
 
-```
-CarCheacks/
-├── main.py                      # Main application (Agents 1 & 2)
-├── dashboard.py                 # Original analytics dashboard (Agent 3)
-├── dashboard_enhanced.py        # 🌟 NEW: Enhanced dashboard with video upload
-├── create_demo_video.py         # 🌟 NEW: Demo video generator
-├── authorized_plates.csv        # Whitelist of authorized plates
-├── requirements.txt             # Python dependencies
-├── generate_demo_data.py        # Demo data generator for testing
-├── validate_system.py           # System validation script
-├── access_log.csv              # Access log (generated at runtime)
-├── .gitignore                  # Git ignore rules
-├── ENHANCED_DASHBOARD_GUIDE.md # 🌟 NEW: Enhanced dashboard documentation
-└── README.md                 # This file
-```
+## Legacy Multi-Agent System
 
-## 🔧 Configuration
+This repository previously contained a multi-agent AI system for vehicle access control. Those files have been preserved with `_old` suffixes:
+- `main_old.py` - Original multi-agent system
+- `README_old.md` - Original documentation
+- Other dashboard and demo files remain available
 
-### Adding Authorized Plates
+## Credits
 
-Edit `authorized_plates.csv` to add or remove authorized license plates:
+This implementation is based on the work by Computer Vision Engineer:
+- [Original Repository](https://github.com/computervisioneng/automatic-number-plate-recognition-python-yolov8)
+- [YouTube Tutorial](https://www.youtube.com/watch?v=fyJB1t0o0ms)
 
-```csv
-plate_number
-ABC123
-XYZ789
-DEF456
-```
+SORT tracker by Alex Bewley:
+- [SORT Repository](https://github.com/abewley/sort)
 
-### Adjusting Detection Parameters
-
-In `main.py`, you can adjust:
-
-- **Frame processing rate**: Change `frame_count % 10` (line ~412) to process more/fewer frames
-- **Duplicate prevention**: Change the 10-second window (line ~420)
-- **Edge detection sensitivity**: Adjust Canny parameters (line ~91)
-- **Contour size threshold**: Modify area check (line ~118)
-
-### Dashboard Refresh Rate
-
-In the dashboard sidebar:
-- Toggle **Auto-refresh** on/off
-- Adjust refresh interval (1-30 seconds)
-
-## 🔍 How It Works
-
-### Agent 1: Vision & OCR Agent
-
-1. **Frame Preprocessing**: Converts frames to grayscale and applies bilateral filtering
-2. **Plate Detection**: 
-   - **Primary Method**: Uses YOLOv8 object detection (default: general YOLOv8n model; can be replaced with license plate-specific models)
-   - **Fallback Method**: Uses Canny edge detection and contour analysis if YOLOv8 is unavailable
-3. **OCR Extraction**: Uses EasyOCR to read text from detected plate regions
-4. **Text Cleaning**: Removes spaces, corrects common OCR errors (O→0, I→1, S→5)
-5. **Video Source Support**: 
-   - IP cameras and RTSP streams (security cameras)
-   - Video file upload
-   - Local webcam
-
-### Agent 2: Access Control Agent
-
-1. **Whitelist Loading**: Reads authorized plates from CSV into a set for fast lookup
-2. **Authorization Check**: Compares detected plate against whitelist
-3. **Decision Making**: Returns ALLOW or DENY based on authorization
-4. **Action Triggering**: Simulates gate opening or alarm
-5. **Logging**: Appends timestamp, plate number, and status to CSV
-
-### Agent 3: Data Analytics Agent
-
-1. **Data Ingestion**: Reads `access_log.csv` with pandas
-2. **KPI Calculation**: Computes totals and percentages
-3. **Visualization**: Creates interactive charts with Plotly
-4. **Live Updates**: Auto-refreshes at configurable intervals
-
-## 🛠️ Troubleshooting
-
-### IP Camera / RTSP Stream Issues
-- Verify the stream URL is correct and accessible
-- Check network connectivity to the camera
-- Ensure username/password are correct if required
-- Some cameras require specific URL formats (check camera documentation)
-
-### Camera not detected
-- Try different camera indices: `cv2.VideoCapture(1)` or `cv2.VideoCapture(2)`
-- Check camera permissions
-- Ensure camera is not in use by another application
-
-### Low OCR accuracy
-- Use YOLOv8 with a specialized license plate detection model for better accuracy
-- Replace the default `yolov8n.pt` with a model trained on license plate datasets
-- Improve lighting conditions
-- Use higher resolution camera or video stream
-- Adjust preprocessing parameters
-
-### Dashboard not updating
-- Ensure `access_log.csv` is being created by main.py
-- Check auto-refresh is enabled
-- Verify file permissions
-
-### GPU not being used
-- Install CUDA toolkit and PyTorch with CUDA support
-- Verify GPU availability: `python -c "import torch; print(torch.cuda.is_available())"`
-
-### YOLOv8 Model Download
-- On first run, YOLOv8 will automatically download the model (may take a few minutes)
-- Ensure you have internet connection for initial setup
-- Models are cached locally after first download
-
-## 📊 Sample Output
-
-### Console Output (main.py)
-```
-Initializing Vision & OCR Agent...
-Loading YOLOv8 license plate detection model...
-YOLOv8 model loaded successfully!
-Vision & OCR Agent ready! (GPU: True, YOLOv8: True)
-
-Select video source:
-1. Live stream from security camera (IP camera/RTSP)
-2. Upload/Load video file
-3. Webcam
-Enter choice (1, 2, or 3): 1
-
-Stream URL: rtsp://192.168.1.100:554/stream
-
-🚗 License Plate Detected: ABC123
-==================================================
-✓ GATE OPENING...
-==================================================
-Decision: ALLOW
-
-🚗 License Plate Detected: XYZ999
-==================================================
-✗ ACCESS DENIED - ALARM TRIGGERED!
-==================================================
-Decision: DENY
-```
-
-### Dashboard Display
-- Clean, interactive web interface
-- Real-time charts and metrics
-- Searchable data table
-- Export capabilities
-
-## 🔐 Security Considerations
-
-- Access logs contain sensitive vehicle data - protect appropriately
-- Whitelist file should have restricted permissions
-- Consider encrypting stored data for production use
-- Implement proper authentication for dashboard access
-- Secure RTSP/IP camera streams with strong passwords
-- Use VPN or secure network for remote camera access
-
-## 🚧 Future Enhancements
-
-- Fine-tune YOLOv8 on custom license plate dataset
-- Multi-camera support with camera management interface
-- Email/SMS notifications for denied access
-- Advanced analytics (peak hours, suspicious patterns)
-- Integration with physical gate controllers
-- Cloud deployment with database backend
-- Mobile application for monitoring
-
-## 📝 License
+## License
 
 This project is open source and available under the MIT License.
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 📧 Contact
-
-For questions or support, please open an issue on GitHub.
-
----
-
-**Note**: This system now integrates YOLOv8 for object detection. The default `yolov8n.pt` general object detection model will be automatically downloaded on first run. For production use with optimal accuracy, replace it with a specialized license plate detection model trained on license plate datasets. A fallback to basic edge detection is available if YOLOv8 is unavailable.
