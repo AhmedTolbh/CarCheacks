@@ -75,20 +75,23 @@ pip install -r requirements.txt
 ```
 
 Required packages:
-- ultralytics==8.0.114
-- pandas==2.0.2
-- opencv-python==4.7.0.72
-- numpy==1.24.3
-- scipy==1.10.1
-- easyocr==1.7.0
-- filterpy==1.4.5
+- ultralytics>=8.0.0
+- pandas>=2.0.0
+- opencv-python>=4.8.0
+- numpy>=1.24.0
+- scipy>=1.10.1
+- easyocr>=1.7.0
+- filterpy>=1.4.5
+- streamlit>=1.27.0
+- plotly>=5.17.0
+- openpyxl>=3.1.0 *(for Excel export)*
 
 ## Project Structure
 
 ```
 CarCheacks/
 ├── main.py                     # Main detection and tracking script
-├── util.py                     # Utility functions (OCR, validation, CSV writing)
+├── util.py                     # Utility functions (OCR, validation, CSV/Excel writing)
 ├── visualize.py                # Visualization script (renders output video)
 ├── add_missing_data.py         # Interpolation script for missing frames
 ├── requirements.txt            # Python dependencies
@@ -98,6 +101,7 @@ CarCheacks/
 ├── sample.mp4                  # Input video file
 ├── test.csv                    # Detection results (generated)
 ├── test_interpolated.csv       # Interpolated results (generated)
+├── license_plates.xlsx         # Excel file with unique license plates (generated)
 └── out.mp4                     # Output annotated video (generated)
 ```
 
@@ -129,7 +133,8 @@ This will:
 - Track vehicles using SORT
 - Detect license plates on tracked vehicles
 - Read license plate text using EasyOCR
-- Save results to `test.csv`
+- Save detailed results to `test.csv`
+- **Generate Excel file (`license_plates.xlsx`) with unique license plates** *(Agent 2)*
 
 ### 3. Interpolate Missing Data
 
@@ -218,6 +223,16 @@ Raw detection results with columns:
 - `license_plate_bbox_score`: Detection confidence
 - `license_number`: Detected text
 - `license_number_score`: OCR confidence
+
+### license_plates.xlsx *(NEW - Agent 2)*
+Excel file containing unique license plates that passed through the video with:
+- `License Plate Number`: Unique plate number detected
+- `First Detected Frame`: Frame where the plate was first detected
+- `Last Detected Frame`: Frame where the plate was last detected
+- `Total Detections`: Number of times the plate was detected
+- `Average Confidence`: Average OCR confidence score
+
+This file provides a clean summary of all vehicles that passed through, making it easy to track and analyze traffic patterns.
 
 ### test_interpolated.csv
 Same format as test.csv but with interpolated data for missing frames (indicated by score values of '0').

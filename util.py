@@ -1,5 +1,8 @@
 import string
 import easyocr
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from datetime import datetime
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=False)
@@ -55,6 +58,91 @@ def write_csv(results, output_path):
                                                             results[frame_nmr][car_id]['license_plate']['text'],
                                                             results[frame_nmr][car_id]['license_plate']['text_score'])
                             )
+
+
+def write_license_plates_to_excel(results, output_path):
+    """
+    Write unique license plate numbers to an Excel file.
+    This function acts as the "second agent" - responsible for tracking
+    all unique license plates that passed through the video.
+
+    Args:
+        results (dict): Dictionary containing the results.
+        output_path (str): Path to the output Excel file.
+    """
+    # Create a new workbook and select the active sheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "License Plates"
+    
+    # Set up header styling
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(color="FFFFFF", bold=True, size=12)
+    
+    # Write headers
+    headers = ['License Plate Number', 'First Detected Frame', 'Last Detected Frame', 
+               'Total Detections', 'Average Confidence']
+    for col_num, header in enumerate(headers, 1):
+        cell = ws.cell(row=1, column=col_num)
+        cell.value = header
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+    
+    # Track unique license plates and their data
+    license_plate_data = {}
+    
+    # Process results to extract unique license plates
+    for frame_nmr in results.keys():
+        for car_id in results[frame_nmr].keys():
+            if 'car' in results[frame_nmr][car_id].keys() and \
+               'license_plate' in results[frame_nmr][car_id].keys() and \
+               'text' in results[frame_nmr][car_id]['license_plate'].keys():
+                
+                plate_text = results[frame_nmr][car_id]['license_plate']['text']
+                confidence = results[frame_nmr][car_id]['license_plate']['text_score']
+                
+                if plate_text not in license_plate_data:
+                    license_plate_data[plate_text] = {
+                        'first_frame': frame_nmr,
+                        'last_frame': frame_nmr,
+                        'detections': 1,
+                        'confidences': [confidence]
+                    }
+                else:
+                    license_plate_data[plate_text]['last_frame'] = frame_nmr
+                    license_plate_data[plate_text]['detections'] += 1
+                    license_plate_data[plate_text]['confidences'].append(confidence)
+    
+    # Write data rows
+    row_num = 2
+    for plate_text, data in sorted(license_plate_data.items()):
+        avg_confidence = sum(data['confidences']) / len(data['confidences'])
+        
+        ws.cell(row=row_num, column=1, value=plate_text)
+        ws.cell(row=row_num, column=2, value=data['first_frame'])
+        ws.cell(row=row_num, column=3, value=data['last_frame'])
+        ws.cell(row=row_num, column=4, value=data['detections'])
+        ws.cell(row=row_num, column=5, value=f"{avg_confidence:.2f}")
+        
+        row_num += 1
+    
+    # Auto-adjust column widths
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except (TypeError, AttributeError):
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    # Save the workbook
+    wb.save(output_path)
+    print(f"Excel file saved to {output_path} with {len(license_plate_data)} unique license plates")
 
 
 
