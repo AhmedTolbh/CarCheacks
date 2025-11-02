@@ -4,6 +4,33 @@ Automatic Number Plate Recognition (ANPR) system using Python, YOLOv8, and EasyO
 
 This implementation is based on the [automatic-number-plate-recognition-python-yolov8](https://github.com/computervisioneng/automatic-number-plate-recognition-python-yolov8) project.
 
+## 🚀 Quick Start - Enhanced Dashboard with Video Upload
+
+**NEW**: The enhanced dashboard provides a complete web-based interface for vehicle access control with integrated video upload and processing!
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the enhanced dashboard
+streamlit run dashboard_enhanced.py
+```
+
+Then open your browser to `http://localhost:8501` and:
+1. Go to the "📹 Video Upload & Analysis" tab
+2. Upload a video file (MP4, AVI, MOV)
+3. Click "🚀 Start Processing"
+4. Watch the multi-agent system work in real-time!
+
+**Features:**
+- 📹 Upload videos directly through the web interface
+- 🤖 Multi-agent AI system (Vision, Access Control, Analytics)
+- 📊 Real-time analytics and visualizations
+- 🔄 Interactive agent workflow visualization
+- 📋 Access log with search and export
+
+For detailed instructions, see [DASHBOARD_VIDEO_UPLOAD_GUIDE.md](DASHBOARD_VIDEO_UPLOAD_GUIDE.md)
+
 ## Overview
 
 This system detects and recognizes license plates from video files using:

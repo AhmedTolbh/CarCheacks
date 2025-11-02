@@ -39,8 +39,8 @@ def test_imports():
         return False
     
     try:
-        from main import VisionOCRAgent, AccessControlAgent
-        print("✓ Agents from main.py")
+        from main_old import VisionOCRAgent, AccessControlAgent
+        print("✓ Agents from main_old.py")
     except ImportError as e:
         print(f"✗ Agents: {e}")
         return False
@@ -120,6 +120,7 @@ def test_file_structure():
     
     required_files = [
         'main.py',
+        'main_old.py',
         'dashboard.py',
         'dashboard_enhanced.py',
         'create_demo_video.py',

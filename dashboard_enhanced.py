@@ -20,14 +20,14 @@ import cv2
 import tempfile
 import numpy as np
 
-# Import agents from main.py
+# Import agents from main_old.py
 import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 try:
-    from main import VisionOCRAgent, AccessControlAgent
+    from main_old import VisionOCRAgent, AccessControlAgent
 except ImportError:
-    st.error("Error: Could not import agents from main.py")
+    st.error("Error: Could not import agents from main_old.py")
     VisionOCRAgent = None
     AccessControlAgent = None
 
